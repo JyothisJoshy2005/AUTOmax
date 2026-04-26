@@ -1,0 +1,155 @@
+:root {
+  /* Premium Color Palette */
+  --color-bg: #050a15; /* Obsidian Blue */
+  --color-primary: #D4AF37; /* Metallic Gold */
+  --color-secondary: #0A1F44; /* Deep Royal Blue */
+  --color-accent: #C0C0C0; /* Silver/Chrome */
+  
+  --color-text-light: #F8F8F8;
+  --color-text-muted: #A0A0A0;
+  
+  /* Fonts */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Poppins', sans-serif;
+  
+  /* Glassmorphism Settings */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 16px;
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  --glow-primary: 0 0 15px rgba(212, 175, 55, 0.6);
+  --glow-accent: 0 0 15px rgba(192, 192, 192, 0.4);
+}
+
+/* Premium Carbon / Tungsten Black Theme (Alternative Dark Mode) */
+body.theme-carbon {
+  --color-bg: #090909; /* Ultra Dark Tungsten Black */
+  --color-secondary: #0A0A0C; /* Near Pitch */
+  --glass-bg: rgba(255, 255, 255, 0.015); /* Slightly darker glass for contrast */
+  --color-primary: #f2e2a9; /* Softened Bright Metallic Gold */
+  --glow-primary: 0 0 25px rgba(212, 175, 55, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text-light);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+/* Base Glass Container */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 16px;
+}
+
+/* Golden text utility */
+.text-gold {
+  color: var(--color-primary);
+}
+
+/* Silver text utility */
+.text-silver {
+  color: var(--color-accent);
+}
+
+/* Common gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), #fff0b3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-btn {
+  background: linear-gradient(135deg, var(--color-secondary), #0d285a);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--color-text-light);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.glow-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-primary);
+  z-index: -1;
+  transition: transform 0.5s ease;
+  transform: scaleX(0);
+  transform-origin: right;
+}
+
+.glow-btn:hover {
+  box-shadow: var(--glow-primary);
+  border-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.glow-btn:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+input {
+  font-family: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
