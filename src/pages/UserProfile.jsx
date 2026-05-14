@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { useToast } from '../contexts/ToastContext';
+import API_BASE from '../config.js';
 
 const SECTION_STYLE = {
   glass: {
@@ -59,7 +60,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
-    axios.get('http://localhost:5000/api/auth/profile', {
+    axios.get(`${API_BASE}/api/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => {
       setProfile(res.data);
@@ -72,7 +73,7 @@ export default function UserProfile() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data } = await axios.put('http://localhost:5000/api/auth/profile', form, {
+      const { data } = await axios.put(`${API_BASE}/api/auth/profile`, form, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(data.user);

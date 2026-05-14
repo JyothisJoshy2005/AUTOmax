@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import { useToast } from '../contexts/ToastContext';
 import { UploadCloud, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import API_BASE from '../config.js';
 
 export default function SellCar() {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ export default function SellCar() {
         return navigate('/login');
       }
 
-      await axios.post('http://localhost:5000/api/cars', {
+      await axios.post(`${API_BASE}/api/cars`, {
         ...formData,
         images,
         sellerName: localStorage.getItem('username') || 'Guest'

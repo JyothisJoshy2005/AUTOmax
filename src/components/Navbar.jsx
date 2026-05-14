@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext';
 import { useSearch } from '../contexts/SearchContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { CARS } from '../data/cars.js';
+import API_BASE from '../config.js';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function Navbar() {
   const [showNotifs, setShowNotifs] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/bids')
+    axios.get(`${API_BASE}/api/bids`)
       .then(res => {
         const myBids = res.data.filter(b => b.bidderName === username);
         setNotifCount(myBids.length);

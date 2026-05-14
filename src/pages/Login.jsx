@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../contexts/ToastContext';
 import { User, MapPin, CreditCard, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import API_BASE from '../config.js';
 
 const inputStyle = {
   width: '100%',
@@ -75,7 +76,7 @@ export default function Login() {
     setErrorMsg('');
     setLoading(true);
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+      const { data } = await axios.post(`${API_BASE}/api/auth/login`, { username, password });
       localStorage.setItem('username', data.username);
       localStorage.setItem('token', data.token);
       localStorage.setItem('balance', data.balance);
@@ -93,7 +94,7 @@ export default function Login() {
     setErrorMsg('');
     setLoading(true);
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/register', {
+      const { data } = await axios.post(`${API_BASE}/api/auth/register`, {
         username, email, password,
         fullName, phone, address, city, state, country,
         bankName, accountNumber, ifscCode, accountHolder,
@@ -125,7 +126,7 @@ export default function Login() {
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {/* Parallax BG */}
       <motion.div animate={{ x: mousePos.x * -30, y: mousePos.y * -30, scale: 1.05 }} transition={{ type: 'tween', ease: 'easeOut', duration: 0.5 }}
-        style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.5)', zIndex: 0 }}
+        style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.5)', zIndex: 0, pointerEvents: 'none' }}
       />
       <motion.div animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 4, repeat: Infinity }}
         style={{ position: 'absolute', top: '20%', right: '25%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }}

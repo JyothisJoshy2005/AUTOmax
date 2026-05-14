@@ -6,6 +6,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { useToast } from '../contexts/ToastContext';
 import WinCelebrationModal from '../components/WinCelebrationModal';
+import API_BASE from '../config.js';
 
 export default function Garage() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function Garage() {
 
     const fetchGarage = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/garage', {
+        const { data } = await axios.get(`${API_BASE}/api/garage`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

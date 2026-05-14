@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Trophy, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE from '../config.js';
 
 const FALLBACK_WINNERS = [
   {
     id: 1,
     car: 'McLaren P1',
     price: '₹25,00,00,000',
-    date: 'Today, 10:30 AM',
+    date: 'May 10, 10:30 AM',
     winner: 'Aarav Patel',
     location: 'Mumbai, India',
     img: '/cars/mclaren_p1_main.jpg'
@@ -18,16 +19,16 @@ const FALLBACK_WINNERS = [
     id: 5,
     car: 'Lamborghini Aventador SVJ',
     price: '₹8,50,00,000',
-    date: 'Yesterday, 8:45 PM',
+    date: 'May 9, 8:45 PM',
     winner: 'James Carter',
     location: 'London, UK',
-    img: '/cars/svj_main.jpg'
+    img: '/cars/svj_main_new.png'
   },
   {
     id: 3,
     car: 'Porsche 911 GT3 RS',
     price: '₹2,80,00,000',
-    date: 'Mar 25, 4:15 PM',
+    date: 'May 8, 4:15 PM',
     winner: 'Yuki Tanaka',
     location: 'Tokyo, Japan',
     img: '/cars/porsche_gt3_main.jpg'
@@ -36,10 +37,37 @@ const FALLBACK_WINNERS = [
     id: 2,
     car: 'Ferrari LaFerrari',
     price: '₹35,00,00,000',
-    date: 'Mar 24, 7:00 PM',
+    date: 'May 7, 7:00 PM',
     winner: 'Sheikh Al-Maktoum',
     location: 'Dubai, UAE',
     img: '/cars/ferrari_laferrari_main.jpg'
+  },
+  {
+    id: 4,
+    car: 'Land Rover Defender V8',
+    price: '₹1,85,00,000',
+    date: 'May 6, 2:00 PM',
+    winner: 'Arjun Mehta',
+    location: 'Delhi, India',
+    img: '/cars/defender_main_new.png'
+  },
+  {
+    id: 6,
+    car: 'Rolls-Royce Phantom',
+    price: '₹15,00,00,000',
+    date: 'May 5, 6:30 PM',
+    winner: 'Carlos Rivera',
+    location: 'Monaco',
+    img: '/rollsroyce.png'
+  },
+  {
+    id: 7,
+    car: 'Bugatti Chiron',
+    price: '₹28,00,00,000',
+    date: 'May 4, 11:00 AM',
+    winner: 'Hans Müller',
+    location: 'Berlin, Germany',
+    img: '/bugatti.png'
   }
 ];
 
@@ -52,8 +80,8 @@ export default function HeroSection() {
     const fetchPastAuctions = async () => {
       try {
         const [carsRes, winnersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/cars'),
-          axios.get('http://localhost:5000/api/winners')
+          axios.get(`${API_BASE}/api/cars`),
+          axios.get(`${API_BASE}/api/winners`)
         ]);
         
         const cars = carsRes.data;

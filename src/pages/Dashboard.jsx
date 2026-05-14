@@ -5,13 +5,14 @@ import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import LiveAuctions from '../components/LiveAuctions';
 import UpcomingAuctions from '../components/UpcomingAuctions';
+import API_BASE from '../config.js';
 
 export default function Dashboard() {
   const username = localStorage.getItem('username') || 'Guest';
   const [activeBidsCount, setActiveBidsCount] = useState(0);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/bids')
+    axios.get(`${API_BASE}/api/bids`)
       .then(res => {
         const myBids = res.data.filter(b => b.bidderName === username);
         setActiveBidsCount(myBids.length);
