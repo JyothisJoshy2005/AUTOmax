@@ -7,22 +7,22 @@ const UPCOMING_AUCTIONS = [
   {
     id: 11,
     car: 'Rolls-Royce Phantom Series II',
-    startTime: '2026-03-28T10:00:00Z',
-    endTime: '2026-03-30T10:00:00Z',
+    startTime: '2026-05-20T10:00:00Z',
+    endTime: '2026-05-22T10:00:00Z',
     img: '/rollsroyce.png'
   },
   {
     id: 12,
     car: 'Bugatti Chiron Pur Sport',
-    startTime: '2026-03-29T15:00:00Z',
-    endTime: '2026-03-31T15:00:00Z',
+    startTime: '2026-05-25T15:00:00Z',
+    endTime: '2026-05-27T15:00:00Z',
     img: '/bugatti.png'
   },
   {
     id: 13,
     car: 'Lamborghini Aventador SVJ',
-    startTime: '2026-03-30T12:00:00Z',
-    endTime: '2026-04-01T12:00:00Z',
+    startTime: '2026-06-01T12:00:00Z',
+    endTime: '2026-06-03T12:00:00Z',
     img: '/lambo.png'
   }
 ];

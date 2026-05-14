@@ -8,7 +8,8 @@ import axios from 'axios';
 import { useToast } from '../contexts/ToastContext';
 import { CARS } from '../data/cars.js';
 
-const socket = io('http://localhost:5000');
+import API_BASE from '../config';
+const socket = io(API_BASE);
 
 export default function CarDetail() {
   const { id } = useParams();
@@ -67,7 +68,7 @@ export default function CarDetail() {
 
   useEffect(() => {
     // Fetch car details
-    axios.get('http://localhost:5000/api/cars')
+    axios.get(`${API_BASE}/api/cars`)
       .then(res => {
         const foundCar = res.data.find(c => c.id.toString() === id.toString());
         if (foundCar) {
@@ -85,7 +86,7 @@ export default function CarDetail() {
       });
 
     // Fetch Bids — sort by highest amount to always show the true winning bid
-    axios.get('http://localhost:5000/api/bids')
+    axios.get(`${API_BASE}/api/bids`)
       .then(res => {
         const carBids = res.data
           .filter(b => b.items && b.items.includes(id))
@@ -124,7 +125,7 @@ export default function CarDetail() {
           return navigate('/login');
         }
 
-        const response = await axios.post('http://localhost:5000/api/bids', {
+        const response = await axios.post(`${API_BASE}/api/bids`, {
           bidAmount: Number(cleanAmount),
           items: [id]
         }, {

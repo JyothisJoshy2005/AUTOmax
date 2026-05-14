@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Clock, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../contexts/SearchContext';
+import API_BASE from '../config.js';
 
 import { CARS } from '../data/cars.js';
 
@@ -27,9 +28,9 @@ export default function LiveAuctions() {
     const fetchCarsAndBids = async () => {
       try {
         const [carsRes, bidsRes, winnersRes] = await Promise.all([
-          fetch('http://localhost:5000/api/cars'),
-          fetch('http://localhost:5000/api/bids'),
-          fetch('http://localhost:5000/api/winners')
+          fetch(`${API_BASE}/api/cars`),
+          fetch(`${API_BASE}/api/bids`),
+          fetch(`${API_BASE}/api/winners`)
         ]);
         
         if (!carsRes.ok) return;

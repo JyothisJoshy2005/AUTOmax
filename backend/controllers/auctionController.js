@@ -85,7 +85,7 @@ const INITIAL_CARS = [
   }
 ];
 
-// Helper to seed DB if empty or missing images
+// Helper to seed DB if empty or missing images, and refresh expired auctions
 const seedDatabase = async () => {
   try {
     const count = await Car.countDocuments();
@@ -95,13 +95,26 @@ const seedDatabase = async () => {
         await Car.create({ ...c, endTime: new Date(Date.now() + c.endsIn * 1000) });
       }
     } else {
-      // Check if we need to restore the 3 images for the initial cars
       for (const c of INITIAL_CARS) {
         const existingCar = await Car.findOne({ id: c.id });
-        if (existingCar && existingCar.images && existingCar.images.length === 1) {
-          existingCar.images = c.images;
-          await existingCar.save();
-          console.log(`Restored missing images for ${c.make} ${c.model}`);
+        if (existingCar) {
+          let updated = false;
+
+          // Restore missing images
+          if (existingCar.images && existingCar.images.length === 1) {
+            existingCar.images = c.images;
+            updated = true;
+            console.log(`Restored missing images for ${existingCar.make} ${existingCar.model}`);
+          }
+
+          // Reset endTime if auction has expired so it always shows as live
+          if (new Date(existingCar.endTime).getTime() <= Date.now()) {
+            existingCar.endTime = new Date(Date.now() + c.endsIn * 1000);
+            updated = true;
+            console.log(`Refreshed expired auction for ${existingCar.make} ${existingCar.model}`);
+          }
+
+          if (updated) await existingCar.save();
         }
       }
     }
