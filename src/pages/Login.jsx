@@ -299,89 +299,75 @@ export default function Login() {
 
         {/* ═══ FORGOT PASSWORD — STEP 1: Enter Username ═══ */}
         {isForgot && forgotStep === 1 && (
-          <AnimatePresence mode="wait">
-            <motion.form
-              key="forgot-step1"
-              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-              onSubmit={handleSendOtp}
-              style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                <KeyRound size={20} color="#D4AF37" />
-                <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)' }}>Enter your username</span>
-              </div>
-              <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 0.5rem', textAlign: 'center' }}>
-                We'll send a 6-digit OTP to your registered email.
-              </p>
+          <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <KeyRound size={20} color="#D4AF37" />
+              <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)' }}>Enter your username</span>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 0.5rem', textAlign: 'center' }}>
+              We'll send a 6-digit OTP to your registered email.
+            </p>
 
-              <Field label="Username *">
-                <StyledInput required value={forgotUsername} onChange={e => setForgotUsername(e.target.value)} placeholder="Your account username" />
-              </Field>
+            <Field label="Username *">
+              <StyledInput required value={forgotUsername} onChange={e => setForgotUsername(e.target.value)} placeholder="Your account username" />
+            </Field>
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
-                <button type="button" onClick={() => switchMode('login')} style={backBtnStyle}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
-                  {loading ? 'Sending OTP...' : '📧 Send OTP'}
-                </button>
-              </div>
-            </motion.form>
-          </AnimatePresence>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+              <button type="button" onClick={() => switchMode('login')} style={backBtnStyle}>
+                <ChevronLeft size={16} /> Back
+              </button>
+              <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Sending OTP...' : '📧 Send OTP'}
+              </button>
+            </div>
+          </form>
         )}
 
         {/* ═══ FORGOT PASSWORD — STEP 2: Enter OTP + New Password ═══ */}
         {isForgot && forgotStep === 2 && (
-          <AnimatePresence mode="wait">
-            <motion.form
-              key="forgot-step2"
-              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-              onSubmit={handleVerifyOtp}
-              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-              <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
-                <KeyRound size={20} color="#D4AF37" style={{ marginBottom: '0.4rem' }} />
-                <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
-                  OTP sent to <strong style={{ color: '#D4AF37' }}>{maskedEmail}</strong>
-                </p>
-                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Valid for 10 minutes</p>
-              </div>
-
-              <Field label="6-Digit OTP *">
-                <StyledInput
-                  required maxLength={6} inputMode="numeric" pattern="[0-9]*"
-                  value={otpValue} onChange={e => setOtpValue(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter OTP from email"
-                  style={{ ...inputStyle, textAlign: 'center', fontSize: '1.4rem', letterSpacing: '6px', fontWeight: 700 }}
-                />
-              </Field>
-
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)' }} />
-
-              <Field label="New Password *">
-                <StyledInput type="password" required minLength={6} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters" />
-              </Field>
-              <Field label="Confirm New Password *">
-                <StyledInput type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" />
-              </Field>
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
-                <button type="button" onClick={() => { setForgotStep(1); setErrorMsg(''); setSuccessMsg(''); }} style={backBtnStyle}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
-                  {loading ? 'Verifying...' : '🔑 Reset Password'}
-                </button>
-              </div>
-
-              <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', margin: '0.25rem 0 0' }}>
-                Didn't get it?{' '}
-                <span style={{ color: '#D4AF37', cursor: 'pointer' }} onClick={() => { setForgotStep(1); setErrorMsg(''); setSuccessMsg(''); }}>
-                  Resend OTP
-                </span>
+          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
+              <KeyRound size={20} color="#D4AF37" style={{ marginBottom: '0.4rem' }} />
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                OTP sent to <strong style={{ color: '#D4AF37' }}>{maskedEmail}</strong>
               </p>
-            </motion.form>
-          </AnimatePresence>
+              <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', margin: '4px 0 0' }}>Valid for 10 minutes</p>
+            </div>
+
+            <Field label="6-Digit OTP *">
+              <StyledInput
+                required maxLength={6} inputMode="numeric" pattern="[0-9]*"
+                value={otpValue} onChange={e => setOtpValue(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter OTP from email"
+                style={{ ...inputStyle, textAlign: 'center', fontSize: '1.4rem', letterSpacing: '6px', fontWeight: 700 }}
+              />
+            </Field>
+
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+
+            <Field label="New Password *">
+              <StyledInput type="password" required minLength={6} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters" />
+            </Field>
+            <Field label="Confirm New Password *">
+              <StyledInput type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" />
+            </Field>
+
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+              <button type="button" onClick={() => { setForgotStep(1); setErrorMsg(''); setSuccessMsg(''); }} style={backBtnStyle}>
+                <ChevronLeft size={16} /> Back
+              </button>
+              <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Verifying...' : '🔑 Reset Password'}
+              </button>
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)', margin: '0.25rem 0 0' }}>
+              Didn't get it?{' '}
+              <span style={{ color: '#D4AF37', cursor: 'pointer' }} onClick={() => { setForgotStep(1); setErrorMsg(''); setSuccessMsg(''); }}>
+                Resend OTP
+              </span>
+            </p>
+          </form>
         )}
 
         {/* ═══ REGISTER — STEP 0: Account ═══ */}
