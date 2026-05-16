@@ -169,17 +169,39 @@ export default function Garage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {activeBids.map((bid, idx) => (
-                    <motion.div 
+                    <motion.div
                       key={idx}
                       whileHover={{ scale: 1.02 }}
                       className="glass-panel"
-                      style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer' }}
+                      style={{
+                        padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', cursor: 'pointer',
+                        border: bid.isLeading ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,80,80,0.3)',
+                        background: bid.isLeading ? 'rgba(212,175,55,0.05)' : 'rgba(255,50,50,0.04)',
+                      }}
                       onClick={() => navigate(`/car/${bid.car.id}`)}
                     >
-                      <img src={bid.car?.images?.[0] || ''} alt="car" style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
-                      <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{bid.car?.make} {bid.car?.model}</h4>
-                        <span className="text-gold" style={{ fontSize: '1.2rem', fontWeight: 600 }}>₹{bid.bidAmount?.toLocaleString() || '0'}</span>
+                      <img src={bid.car?.images?.[0] || ''} alt="car" style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                          <h4 style={{ margin: 0, fontSize: '1rem' }}>{bid.car?.make} {bid.car?.model}</h4>
+                          <span style={{
+                            fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '20px',
+                            background: bid.isLeading ? 'rgba(50,200,100,0.15)' : 'rgba(255,80,80,0.15)',
+                            color: bid.isLeading ? '#4ade80' : '#f87171',
+                            border: bid.isLeading ? '1px solid rgba(50,200,100,0.3)' : '1px solid rgba(255,80,80,0.3)',
+                          }}>
+                            {bid.isLeading ? '🏆 LEADING' : '⚡ OUTBID'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.45)' }}>
+                          Your bid: <span style={{ color: 'white' }}>₹{Number(bid.bidAmount).toLocaleString('en-IN')}</span>
+                        </div>
+                        {!bid.isLeading && (
+                          <div style={{ fontSize: '0.82rem', color: '#f87171', marginTop: '2px' }}>
+                            Highest: <span style={{ fontWeight: 700 }}>₹{Number(bid.currentHighestBid).toLocaleString('en-IN')}</span>
+                            {bid.highestBidder ? <span style={{ color: 'rgba(255,255,255,0.4)' }}> by {bid.highestBidder}</span> : ''}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}

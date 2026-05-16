@@ -85,15 +85,15 @@ export default function CarDetail() {
         setLoading(false);
       });
 
-    // Fetch Bids — sort by highest amount to always show the true winning bid
-    axios.get(`${API_BASE}/api/bids`)
+    // Fetch Bids — sort by highest amount, filter by carId (not items)
+    axios.get(API_BASE + '/api/bids')
       .then(res => {
         const carBids = res.data
-          .filter(b => b.items && b.items.includes(id))
+          .filter(b => b.carId === id.toString() || (b.items && b.items.includes(id)))
           .sort((a, b) => Number(b.bidAmount) - Number(a.bidAmount)); // highest first
         if (carBids.length > 0) {
-          setLiveHistory(carBids.map(b => ({ user: b.bidderName, amount: Number(b.bidAmount).toLocaleString() })).slice(0, 5));
-          setLiveBid(Number(carBids[0].bidAmount).toLocaleString()); // always the highest bid
+          setLiveHistory(carBids.map(b => ({ user: b.bidderName, amount: Number(b.bidAmount).toLocaleString('en-IN') })).slice(0, 5));
+          setLiveBid(Number(carBids[0].bidAmount).toLocaleString('en-IN')); // always the highest bid
           setLiveBidder(carBids[0].bidderName);
         }
       })

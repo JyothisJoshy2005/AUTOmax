@@ -298,19 +298,40 @@ export const getUserGarage = async (req, res) => {
     // 1. Cars Listed by User
     const listedCars = allCars.filter(c => c.sellerName === username);
 
-    // 2. Active Bids
+    // 2. Active Bids — only on valid, still-running cars, deduplicated per car
     const allBids = await Bid.find();
     const userBids = allBids.filter(b => b.bidderName === username);
     
-    const activeBidsWithCars = [];
+    // Track one entry per car (user's highest bid on that car)
+    const seenCars = new Map();
     for (const bid of userBids) {
       const car = allCars.find(c => c.id === bid.carId);
-      if (car && new Date(car.endTime).getTime() > Date.now()) {
-        activeBidsWithCars.push({
-          ...bid.toObject(),
-          car
-        });
+      if (!car || new Date(car.endTime).getTime() <= Date.now()) continue; // skip expired or missing cars
+
+      const existing = seenCars.get(bid.carId);
+      if (!existing || bid.bidAmount > existing.bidAmount) {
+        seenCars.set(bid.carId, bid);
       }
+    }
+
+    const activeBidsWithCars = [];
+    for (const [carId, bid] of seenCars) {
+      const car = allCars.find(c => c.id === carId);
+      // Find the current highest bid globally for this car
+      const carBids = allBids.filter(b => b.carId === carId);
+      const currentHighestBid = carBids.length > 0
+        ? Math.max(...carBids.map(b => b.bidAmount))
+        : car.startingBid;
+      const highestBidder = carBids.sort((a, b) => b.bidAmount - a.bidAmount)[0]?.bidderName;
+      const isLeading = highestBidder === username;
+
+      activeBidsWithCars.push({
+        ...bid.toObject(),
+        car,
+        currentHighestBid,
+        isLeading,
+        highestBidder,
+      });
     }
 
     // 3. Won Cars (Purchased)
@@ -344,3 +365,4 @@ export const getUserGarage = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../contexts/ToastContext';
-import { User, MapPin, CreditCard, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { User, MapPin, CreditCard, ChevronRight, ChevronLeft, Check, KeyRound } from 'lucide-react';
 import API_BASE from '../config.js';
 
 const inputStyle = {
@@ -34,42 +34,73 @@ const STEPS = [
   { icon: CreditCard, label: 'Banking'  },
 ];
 
+function Field({ label, children }) {
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <label style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function StyledInput({ type = 'text', ...props }) {
+  return (
+    <input
+      type={type}
+      style={inputStyle}
+      onFocus={e => e.target.style.borderColor = '#D4AF37'}
+      onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+      {...props}
+    />
+  );
+}
+
 export default function Login() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isRegister, setIsRegister] = useState(false);
+
+  // View mode: 'login' | 'register' | 'forgot'
+  const [mode, setMode] = useState('login');
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  // Step 0 — Account credentials
+  // Login fields
   const [username, setUsername] = useState('');
-  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
 
-  // Step 1 — Personal info
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone]       = useState('');
-  const [address, setAddress]   = useState('');
-  const [city, setCity]         = useState('');
-  const [state, setState]       = useState('');
-  const [country, setCountry]   = useState('');
-
-  // Step 2 — Bank details
-  const [bankName, setBankName]         = useState('');
+  // Register fields
+  const [regUsername, setRegUsername] = useState('');
+  const [regEmail, setRegEmail]       = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [fullName, setFullName]       = useState('');
+  const [phone, setPhone]             = useState('');
+  const [address, setAddress]         = useState('');
+  const [city, setCity]               = useState('');
+  const [state, setState]             = useState('');
+  const [country, setCountry]         = useState('');
+  const [bankName, setBankName]           = useState('');
   const [accountHolder, setAccountHolder] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [ifscCode, setIfscCode]           = useState('');
 
+  // Forgot password fields
+  const [forgotUsername, setForgotUsername]       = useState('');
+  const [forgotEmail, setForgotEmail]             = useState('');
+  const [newPassword, setNewPassword]             = useState('');
+  const [confirmPassword, setConfirmPassword]     = useState('');
+
   useEffect(() => {
-    const handleMouseMove = (e) => setMousePos({ x: e.clientX / window.innerWidth - 0.5, y: e.clientY / window.innerHeight - 0.5 });
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const handle = (e) => setMousePos({ x: e.clientX / window.innerWidth - 0.5, y: e.clientY / window.innerHeight - 0.5 });
+    window.addEventListener('mousemove', handle);
+    return () => window.removeEventListener('mousemove', handle);
   }, []);
 
-  // Reset to step 0 when switching between login/register
-  const toggleMode = () => { setIsRegister(r => !r); setStep(0); setErrorMsg(''); };
+  const switchMode = (m) => { setMode(m); setStep(0); setErrorMsg(''); setSuccessMsg(''); };
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -80,7 +111,7 @@ export default function Login() {
       localStorage.setItem('username', data.username);
       localStorage.setItem('token', data.token);
       localStorage.setItem('balance', data.balance);
-      showToast(`🏁 Welcome back, ${data.username}. The engines are warm and the showroom awaits.`, 'success');
+      showToast(`🏁 Welcome back, ${data.username}. The engines are warm!`, 'success');
       navigate('/dashboard');
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Login failed. Check your credentials.');
@@ -95,18 +126,41 @@ export default function Login() {
     setLoading(true);
     try {
       const { data } = await axios.post(`${API_BASE}/api/auth/register`, {
-        username, email, password,
+        username: regUsername, email: regEmail, password: regPassword,
         fullName, phone, address, city, state, country,
         bankName, accountNumber, ifscCode, accountHolder,
       });
       localStorage.setItem('username', data.username);
       localStorage.setItem('token', data.token);
       localStorage.setItem('balance', data.balance);
-      showToast(`🔥 Welcome aboard, ${data.username}! Tighten your seatbelts — you're now in the most exclusive auction floor on the planet.`, 'success');
+      showToast(`🔥 Welcome aboard, ${data.username}! You're in the most exclusive auction floor.`, 'success');
       navigate('/dashboard');
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Registration failed.');
-      setStep(0); // send back to first step on error
+      setStep(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    if (newPassword !== confirmPassword) return setErrorMsg('Passwords do not match.');
+    if (newPassword.length < 6) return setErrorMsg('Password must be at least 6 characters.');
+    setLoading(true);
+    try {
+      const { data } = await axios.post(`${API_BASE}/api/auth/reset-password`, {
+        username: forgotUsername,
+        email: forgotEmail,
+        newPassword,
+      });
+      setSuccessMsg(data.message);
+      showToast('✅ Password reset successfully! Please log in.', 'success');
+      setTimeout(() => { switchMode('login'); }, 2500);
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Reset failed. Check your username and email.');
     } finally {
       setLoading(false);
     }
@@ -115,36 +169,46 @@ export default function Login() {
   const nextStep = (e) => { e.preventDefault(); setErrorMsg(''); setStep(s => s + 1); };
   const prevStep = () => { setErrorMsg(''); setStep(s => s - 1); };
 
-  const Field = ({ label, children }) => (
-    <div style={{ textAlign: 'left' }}>
-      <label style={labelStyle}>{label}</label>
-      {children}
-    </div>
-  );
+  const backBtnStyle = {
+    flex: '0 0 auto', padding: '12px 18px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    color: 'white', borderRadius: '8px', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', gap: '6px',
+  };
+
+  const isRegister = mode === 'register';
+  const isForgot   = mode === 'forgot';
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
       {/* Parallax BG */}
-      <motion.div animate={{ x: mousePos.x * -30, y: mousePos.y * -30, scale: 1.05 }} transition={{ type: 'tween', ease: 'easeOut', duration: 0.5 }}
+      <motion.div
+        animate={{ x: mousePos.x * -30, y: mousePos.y * -30, scale: 1.05 }}
+        transition={{ type: 'tween', ease: 'easeOut', duration: 0.5 }}
         style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/hero-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'brightness(0.5)', zIndex: 0, pointerEvents: 'none' }}
       />
-      <motion.div animate={{ opacity: [0.3, 0.5, 0.3] }} transition={{ duration: 4, repeat: Infinity }}
+      <motion.div
+        animate={{ opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity }}
         style={{ position: 'absolute', top: '20%', right: '25%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }}
       />
 
+      {/* Card */}
       <motion.div
         initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7 }}
         className="glass-panel"
-        style={{ position: 'relative', zIndex: 2, padding: '2.5rem 2.5rem 2rem', width: '100%', maxWidth: isRegister ? '540px' : '440px', textAlign: 'center', overflow: 'hidden', boxSizing: 'border-box' }}
+        style={{ position: 'relative', zIndex: 2, padding: '2.5rem 2.5rem 2rem', width: '100%', maxWidth: isRegister ? '540px' : '460px', textAlign: 'center', boxSizing: 'border-box' }}
       >
         <h1 className="text-gold" style={{ margin: '0 0 4px', fontSize: '2.2rem', letterSpacing: '2px' }}>AUTOmax</h1>
         <p className="gradient-text" style={{ margin: '0 0 1.8rem', fontSize: '1rem', fontStyle: 'italic' }}>
-          {isRegister ? '"Join the Elite"' : '"Bid Beyond Limits"'}
+          {isForgot ? '"Reset Your Access"' : isRegister ? '"Join the Elite"' : '"Bid Beyond Limits"'}
         </p>
 
-        {/* ── Step indicator (register only) ── */}
+        {/* Step indicator (register only) */}
         {isRegister && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0', marginBottom: '1.8rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1.8rem' }}>
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const done = i < step;
@@ -156,8 +220,7 @@ export default function Login() {
                       width: '36px', height: '36px', borderRadius: '50%',
                       background: done ? 'var(--color-primary)' : active ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)',
                       border: `2px solid ${done || active ? 'var(--color-primary)' : 'rgba(255,255,255,0.15)'}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.3s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
                     }}>
                       {done ? <Check size={16} color="#000" /> : <Icon size={16} color={active ? '#D4AF37' : 'rgba(255,255,255,0.3)'} />}
                     </div>
@@ -172,135 +235,189 @@ export default function Login() {
           </div>
         )}
 
-        {errorMsg && <div style={{ color: '#ff4d4d', background: 'rgba(255,0,0,0.1)', padding: '10px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem' }}>{errorMsg}</div>}
+        {/* Error / Success messages */}
+        {errorMsg && (
+          <div style={{ color: '#ff4d4d', background: 'rgba(255,0,0,0.1)', padding: '10px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem' }}>
+            {errorMsg}
+          </div>
+        )}
+        {successMsg && (
+          <div style={{ color: '#4dff91', background: 'rgba(0,255,100,0.08)', padding: '10px', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.88rem' }}>
+            {successMsg}
+          </div>
+        )}
 
         {/* ═══ LOGIN FORM ═══ */}
-        {!isRegister && (
+        {!isRegister && !isForgot && (
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
             <Field label="Username">
-              <input type="text" required value={username} onChange={e => setUsername(e.target.value)} style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+              <StyledInput required value={username} onChange={e => setUsername(e.target.value)} />
             </Field>
             <Field label="Password">
-              <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+              <StyledInput type="password" required value={password} onChange={e => setPassword(e.target.value)} />
             </Field>
-            <button type="submit" disabled={loading} className="glow-btn" style={{ padding: '13px', marginTop: '0.5rem', opacity: loading ? 0.7 : 1 }}>
+
+            {/* Forgot Password link */}
+            <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
+              <span
+                onClick={() => switchMode('forgot')}
+                style={{ color: 'rgba(212,175,55,0.7)', fontSize: '0.82rem', cursor: 'pointer', transition: 'color 0.2s' }}
+                onMouseOver={e => e.target.style.color = '#D4AF37'}
+                onMouseOut={e => e.target.style.color = 'rgba(212,175,55,0.7)'}
+              >
+                Forgot Password?
+              </span>
+            </div>
+
+            <button type="submit" disabled={loading} className="glow-btn" style={{ padding: '13px', opacity: loading ? 0.7 : 1 }}>
               {loading ? 'Entering...' : 'Enter Showroom'}
             </button>
           </form>
         )}
 
-        {/* ═══ REGISTER — STEP 0: Account ═══ */}
-        {isRegister && step === 0 && (
+        {/* ═══ FORGOT PASSWORD FORM ═══ */}
+        {isForgot && (
           <AnimatePresence mode="wait">
-            <motion.form key="step0" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-              onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <motion.form
+              key="forgot"
+              initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
+              onSubmit={handleForgotPassword}
+              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <KeyRound size={20} color="#D4AF37" />
+                <span style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)' }}>Verify your identity to reset</span>
+              </div>
+
               <Field label="Username *">
-                <input type="text" required minLength={3} value={username} onChange={e => setUsername(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+                <StyledInput required value={forgotUsername} onChange={e => setForgotUsername(e.target.value)} placeholder="Your account username" />
               </Field>
-              <Field label="Email *">
-                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+              <Field label="Registered Email *">
+                <StyledInput type="email" required value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="Email used during registration" />
               </Field>
-              <Field label="Password *">
-                <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '0.25rem 0' }} />
+
+              <Field label="New Password *">
+                <StyledInput type="password" required minLength={6} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 6 characters" />
               </Field>
-              <button type="submit" className="glow-btn" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '0.5rem' }}>
-                Next: Personal Info <ChevronRight size={18} />
-              </button>
+              <Field label="Confirm New Password *">
+                <StyledInput type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter new password" />
+              </Field>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => switchMode('login')} style={backBtnStyle}>
+                  <ChevronLeft size={16} /> Back
+                </button>
+                <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
+                  {loading ? 'Resetting...' : '🔑 Reset Password'}
+                </button>
+              </div>
             </motion.form>
           </AnimatePresence>
+        )}
+
+        {/* ═══ REGISTER — STEP 0: Account ═══ */}
+        {isRegister && step === 0 && (
+          <form key="step0" onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Field label="Username *">
+              <StyledInput required minLength={3} value={regUsername} onChange={e => setRegUsername(e.target.value)} />
+            </Field>
+            <Field label="Email *">
+              <StyledInput type="email" required value={regEmail} onChange={e => setRegEmail(e.target.value)} />
+            </Field>
+            <Field label="Password *">
+              <StyledInput type="password" required minLength={6} value={regPassword} onChange={e => setRegPassword(e.target.value)} />
+            </Field>
+            <button type="submit" className="glow-btn" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '0.5rem' }}>
+              Next: Personal Info <ChevronRight size={18} />
+            </button>
+          </form>
         )}
 
         {/* ═══ REGISTER — STEP 1: Personal Details ═══ */}
         {isRegister && step === 1 && (
-          <AnimatePresence mode="wait">
-            <motion.form key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-              onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <Field label="Full Name *">
-                <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+          <form key="step1" onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Field label="Full Name *">
+              <StyledInput required value={fullName} onChange={e => setFullName(e.target.value)} />
+            </Field>
+            <Field label="Phone *">
+              <StyledInput type="tel" required value={phone} onChange={e => setPhone(e.target.value)} />
+            </Field>
+            <Field label="Address *">
+              <StyledInput required value={address} onChange={e => setAddress(e.target.value)} />
+            </Field>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <Field label="City *">
+                <StyledInput required value={city} onChange={e => setCity(e.target.value)} />
               </Field>
-              <Field label="Phone *">
-                <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+              <Field label="State *">
+                <StyledInput required value={state} onChange={e => setState(e.target.value)} />
               </Field>
-              <Field label="Address *">
-                <input type="text" required value={address} onChange={e => setAddress(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-              </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <Field label="City *">
-                  <input type="text" required value={city} onChange={e => setCity(e.target.value)} style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                </Field>
-                <Field label="State *">
-                  <input type="text" required value={state} onChange={e => setState(e.target.value)} style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                </Field>
-              </div>
-              <Field label="Country *">
-                <input type="text" required value={country} onChange={e => setCountry(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-              </Field>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                <button type="button" onClick={prevStep} style={{ flex: '0 0 auto', padding: '12px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="submit" className="glow-btn" style={{ flex: 1, padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  Next: Bank Details <ChevronRight size={18} />
-                </button>
-              </div>
-            </motion.form>
-          </AnimatePresence>
+            </div>
+            <Field label="Country *">
+              <StyledInput required value={country} onChange={e => setCountry(e.target.value)} />
+            </Field>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+              <button type="button" onClick={prevStep} style={backBtnStyle}>
+                <ChevronLeft size={16} /> Back
+              </button>
+              <button type="submit" className="glow-btn" style={{ flex: 1, padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                Next: Bank Details <ChevronRight size={18} />
+              </button>
+            </div>
+          </form>
         )}
 
         {/* ═══ REGISTER — STEP 2: Bank Details ═══ */}
         {isRegister && step === 2 && (
-          <AnimatePresence mode="wait">
-            <motion.form key="step2" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}
-              onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ padding: '10px 14px', background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '8px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textAlign: 'left' }}>
-                🔒 Bank details are for display purposes only. No real transactions occur.
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <Field label="Bank Name *">
-                  <input type="text" required value={bankName} onChange={e => setBankName(e.target.value)} style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                </Field>
-                <Field label="Account Holder *">
-                  <input type="text" required value={accountHolder} onChange={e => setAccountHolder(e.target.value)} style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
-                </Field>
-              </div>
-              <Field label="Account Number *">
-                <input type="text" required value={accountNumber} onChange={e => setAccountNumber(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+          <form key="step2" onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ padding: '10px 14px', background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '8px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', textAlign: 'left' }}>
+              🔒 Bank details are for display purposes only. No real transactions occur.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <Field label="Bank Name *">
+                <StyledInput required value={bankName} onChange={e => setBankName(e.target.value)} />
               </Field>
-              <Field label="IFSC / SWIFT Code *">
-                <input type="text" required value={ifscCode} onChange={e => setIfscCode(e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#D4AF37'} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'} />
+              <Field label="Account Holder *">
+                <StyledInput required value={accountHolder} onChange={e => setAccountHolder(e.target.value)} />
               </Field>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                <button type="button" onClick={prevStep} style={{ flex: '0 0 auto', padding: '12px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ChevronLeft size={16} /> Back
-                </button>
-                <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
-                  {loading ? 'Creating Account...' : '🏎️ Enter the Showroom'}
-                </button>
-              </div>
-            </motion.form>
-          </AnimatePresence>
+            </div>
+            <Field label="Account Number *">
+              <StyledInput required value={accountNumber} onChange={e => setAccountNumber(e.target.value)} />
+            </Field>
+            <Field label="IFSC / SWIFT Code *">
+              <StyledInput required value={ifscCode} onChange={e => setIfscCode(e.target.value)} />
+            </Field>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+              <button type="button" onClick={prevStep} style={backBtnStyle}>
+                <ChevronLeft size={16} /> Back
+              </button>
+              <button type="submit" disabled={loading} className="glow-btn" style={{ flex: 1, padding: '12px', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Creating Account...' : '🏎️ Enter the Showroom'}
+              </button>
+            </div>
+          </form>
         )}
 
+        {/* Footer links */}
         <p style={{ marginTop: '1.5rem', fontSize: '0.88rem', color: 'rgba(255,255,255,0.4)' }}>
-          {isRegister ? 'Already a member? ' : "Don't have an account? "}
-          <span style={{ color: '#D4AF37', cursor: 'pointer', fontWeight: 600 }} onClick={toggleMode}>
-            {isRegister ? 'Login Instead' : 'Create One'}
-          </span>
+          {isForgot ? (
+            <>
+              Remembered it?{' '}
+              <span style={{ color: '#D4AF37', cursor: 'pointer', fontWeight: 600 }} onClick={() => switchMode('login')}>Login Instead</span>
+            </>
+          ) : isRegister ? (
+            <>
+              Already a member?{' '}
+              <span style={{ color: '#D4AF37', cursor: 'pointer', fontWeight: 600 }} onClick={() => switchMode('login')}>Login Instead</span>
+            </>
+          ) : (
+            <>
+              Don't have an account?{' '}
+              <span style={{ color: '#D4AF37', cursor: 'pointer', fontWeight: 600 }} onClick={() => switchMode('register')}>Create One</span>
+            </>
+          )}
         </p>
       </motion.div>
     </div>

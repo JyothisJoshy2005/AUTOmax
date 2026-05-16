@@ -11,14 +11,15 @@ export default function Dashboard() {
   const username = localStorage.getItem('username') || 'Guest';
   const [activeBidsCount, setActiveBidsCount] = useState(0);
 
+  const token = localStorage.getItem('token');
+
   useEffect(() => {
-    axios.get(`${API_BASE}/api/bids`)
-      .then(res => {
-        const myBids = res.data.filter(b => b.bidderName === username);
-        setActiveBidsCount(myBids.length);
-      })
+    if (!token) return;
+    // Use garage endpoint so count matches exactly what the Garage page shows
+    axios.get(API_BASE + '/api/garage', { headers: { Authorization: 'Bearer ' + token } })
+      .then(res => setActiveBidsCount(res.data.activeBids?.length || 0))
       .catch(console.error);
-  }, [username]);
+  }, [username, token]);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

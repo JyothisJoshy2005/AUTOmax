@@ -43,16 +43,22 @@ export default function LiveAuctions() {
         const enrichedAuctions = carsData.map(car => {
           newTimers[car.id] = car.endsIn;
 
-          const carBids = bidsData.filter(b => b.items.includes(car.id.toString()));
-          let maxBid = 0;
+          // Use car.currentBid from DB (kept in sync by backend) as primary source
+          // Fall back to computing from bids only if currentBid is 0
+          let displayBid = car.currentBid > 0 ? car.currentBid : car.startingBid;
+
+          // Also verify against bids using carId (not items)
+          const carBids = bidsData.filter(b => b.carId === car.id.toString() || (b.items && b.items.includes(car.id.toString())));
           if (carBids.length > 0) {
-            maxBid = Math.max(...carBids.map(b => b.bidAmount));
+            const maxBid = Math.max(...carBids.map(b => Number(b.bidAmount)));
+            if (maxBid > displayBid) displayBid = maxBid;
           }
-          const isWinning = winnersData.winners?.some(w => w.bidderName === username && w.items.includes(car.id.toString()));
+
+          const isWinning = winnersData.winners?.some(w => w.bidderName === username && (w.carId === car.id.toString() || (w.items && w.items.includes(car.id.toString()))));
 
           return {
             ...car,
-            currentBid: maxBid > 0 ? `₹${maxBid.toLocaleString()}` : `₹${car.startingBid.toLocaleString()}`,
+            currentBid: `₹${displayBid.toLocaleString('en-IN')}`,
             activeBid: isWinning || false
           };
         });
