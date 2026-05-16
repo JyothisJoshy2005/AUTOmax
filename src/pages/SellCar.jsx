@@ -96,7 +96,7 @@ export default function SellCar() {
           
           {/* Images Section */}
           <div>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Vehicle Photos (Max 3)</h3>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.2rem' }}>Vehicle Photos (Max 3) *</h3>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               {images.map((img, idx) => (
                 <div key={idx} style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
@@ -123,42 +123,42 @@ export default function SellCar() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Make</label>
+              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Make *</label>
               <input type="text" name="make" required placeholder="e.g. Lamborghini" value={formData.make} onChange={handleChange} className="login-input" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Model</label>
+              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Model *</label>
               <input type="text" name="model" required placeholder="e.g. Aventador SVJ" value={formData.model} onChange={handleChange} className="login-input" />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Engine</label>
-              <input type="text" name="engine" placeholder="e.g. 6.5L V12" value={formData.engine} onChange={handleChange} className="login-input" />
+              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Engine *</label>
+              <input type="text" name="engine" required placeholder="e.g. 6.5L V12" value={formData.engine} onChange={handleChange} className="login-input" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Horsepower</label>
-              <input type="text" name="horsepower" placeholder="e.g. 759 hp" value={formData.horsepower} onChange={handleChange} className="login-input" />
+              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Horsepower *</label>
+              <input type="text" name="horsepower" required placeholder="e.g. 759 hp" value={formData.horsepower} onChange={handleChange} className="login-input" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Top Speed</label>
-              <input type="text" name="topSpeed" placeholder="e.g. 217 mph" value={formData.topSpeed} onChange={handleChange} className="login-input" />
+              <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Top Speed *</label>
+              <input type="text" name="topSpeed" required placeholder="e.g. 217 mph" value={formData.topSpeed} onChange={handleChange} className="login-input" />
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Short Description</label>
-            <textarea name="description" rows="3" placeholder="Describe the vehicle..." value={formData.description} onChange={handleChange} className="login-input" style={{ resize: 'vertical' }}></textarea>
+            <label style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Description *</label>
+            <textarea name="description" required rows="3" placeholder="Describe the vehicle's condition, history, special features..." value={formData.description} onChange={handleChange} className="login-input" style={{ resize: 'vertical', minHeight: '80px' }}></textarea>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', padding: '1.5rem', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: 600 }}>Starting Bid (₹)</label>
+              <label style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: 600 }}>Starting Bid (₹) *</label>
               <input type="number" name="startingBid" required min="100000" placeholder="e.g. 10000000" value={formData.startingBid} onChange={handleChange} className="login-input" style={{ borderColor: 'var(--color-primary)' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: 600 }}>Auction Duration (Minutes)</label>
+              <label style={{ color: 'var(--color-primary)', fontSize: '0.9rem', fontWeight: 600 }}>Auction Duration (Minutes) *</label>
               <input type="number" name="durationMinutes" required min="1" max="1440" placeholder="e.g. 10" value={formData.durationMinutes} onChange={handleChange} className="login-input" style={{ borderColor: 'var(--color-primary)' }} />
             </div>
           </div>

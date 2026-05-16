@@ -10,16 +10,36 @@ import API_BASE from '../config.js';
 export default function Dashboard() {
   const username = localStorage.getItem('username') || 'Guest';
   const [activeBidsCount, setActiveBidsCount] = useState(0);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
 
   const token = localStorage.getItem('token');
 
   useEffect(() => {
+    const flagKey = `firstVisit_${username}`;
+    if (localStorage.getItem(flagKey) === 'true') {
+      setIsFirstVisit(true);
+      localStorage.removeItem(flagKey);
+    }
+  }, [username]);
+
+  useEffect(() => {
     if (!token) return;
-    // Use garage endpoint so count matches exactly what the Garage page shows
     axios.get(API_BASE + '/api/garage', { headers: { Authorization: 'Bearer ' + token } })
       .then(res => setActiveBidsCount(res.data.activeBids?.length || 0))
       .catch(console.error);
   }, [username, token]);
+
+  const greeting = username && username !== 'Guest'
+    ? isFirstVisit
+      ? <> 🏎️ Welcome to the showroom, <span className="gradient-text">{username}</span>! </>
+      : <> 🏁 Back on the track, <span className="gradient-text">{username}</span>. </>
+    : <> Welcome to <span className="gradient-text">AUTOmax</span>. </>;
+
+  const subtext = username && username !== 'Guest'
+    ? isFirstVisit
+      ? 'Your seat is reserved. The engines are ready — start exploring the auctions below.'
+      : <> You have <span className="text-gold" style={{fontWeight: 600}}>{activeBidsCount} active bid{activeBidsCount !== 1 ? 's' : ''}</span> live on the auction floor. </>
+    : <>Login to start bidding on the world's most exclusive supercars.</>;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -33,16 +53,10 @@ export default function Dashboard() {
           style={{ marginBottom: '3rem' }}
         >
           <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-            {username && username !== 'Guest'
-              ? <> 🏁 Back in the pit, <span className="gradient-text">{username}</span>. </>
-              : <> Welcome to <span className="gradient-text">AUTOmax</span>. </>
-            }
+            {greeting}
           </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>
-            {username && username !== 'Guest'
-              ? <> You have <span className="text-gold" style={{fontWeight: 600}}>{activeBidsCount} active bid{activeBidsCount !== 1 ? 's' : ''}</span> live on the auction floor. </>
-              : <>Login to start bidding on the world's most exclusive supercars.</>
-            }
+            {subtext}
           </p>
         </motion.div>
 

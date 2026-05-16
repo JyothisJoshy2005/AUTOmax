@@ -34,6 +34,102 @@ const STEPS = [
   { icon: CreditCard, label: 'Banking'  },
 ];
 
+// ── Country → States map ──────────────────────────────────────────────────────
+const COUNTRY_STATES = {
+  'India': ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Andaman & Nicobar Islands','Chandigarh','Dadra & Nagar Haveli','Daman & Diu','Delhi','Jammu & Kashmir','Ladakh','Lakshadweep','Puducherry'],
+  'United States': ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'],
+  'United Kingdom': ['England','Scotland','Wales','Northern Ireland'],
+  'United Arab Emirates': ['Abu Dhabi','Dubai','Sharjah','Ajman','Umm Al Quwain','Ras Al Khaimah','Fujairah'],
+  'Australia': ['New South Wales','Victoria','Queensland','South Australia','Western Australia','Tasmania','Australian Capital Territory','Northern Territory'],
+  'Canada': ['Alberta','British Columbia','Manitoba','New Brunswick','Newfoundland & Labrador','Northwest Territories','Nova Scotia','Nunavut','Ontario','Prince Edward Island','Quebec','Saskatchewan','Yukon'],
+  'Germany': ['Baden-Württemberg','Bavaria','Berlin','Brandenburg','Bremen','Hamburg','Hesse','Lower Saxony','Mecklenburg-Vorpommern','North Rhine-Westphalia','Rhineland-Palatinate','Saarland','Saxony','Saxony-Anhalt','Schleswig-Holstein','Thuringia'],
+  'Singapore': ['Central Region','East Region','North Region','North-East Region','West Region'],
+  'Other': ['N/A'],
+};
+const COUNTRIES = Object.keys(COUNTRY_STATES);
+
+// ── State → Cities map ────────────────────────────────────────────────────────
+const STATE_CITIES = {
+  // India
+  'Andhra Pradesh':         ['Visakhapatnam','Vijayawada','Guntur','Nellore','Kurnool','Tirupati','Rajahmundry','Kakinada','Kadapa','Anantapur'],
+  'Arunachal Pradesh':      ['Itanagar','Naharlagun','Pasighat','Tezpur'],
+  'Assam':                  ['Guwahati','Silchar','Dibrugarh','Jorhat','Nagaon','Tinsukia','Tezpur','Bongaigaon'],
+  'Bihar':                  ['Patna','Gaya','Bhagalpur','Muzaffarpur','Purnia','Darbhanga','Bihar Sharif','Arrah'],
+  'Chhattisgarh':           ['Raipur','Bhilai','Bilaspur','Korba','Durg','Rajnandgaon','Jagdalpur'],
+  'Goa':                    ['Panaji','Margao','Vasco da Gama','Mapusa','Ponda','Bicholim'],
+  'Gujarat':                ['Ahmedabad','Surat','Vadodara','Rajkot','Bhavnagar','Jamnagar','Gandhinagar','Anand','Morbi','Nadiad'],
+  'Haryana':                ['Faridabad','Gurgaon','Panipat','Ambala','Yamunanagar','Rohtak','Hisar','Karnal','Sonipat','Panchkula'],
+  'Himachal Pradesh':       ['Shimla','Mandi','Solan','Dharamshala','Baddi','Palampur','Kullu','Manali'],
+  'Jharkhand':              ['Ranchi','Jamshedpur','Dhanbad','Bokaro','Deoghar','Hazaribagh','Giridih'],
+  'Karnataka':              ['Bengaluru','Mysuru','Mangaluru','Hubballi','Belagavi','Kalaburagi','Davangere','Ballari','Vijayapura','Shivamogga','Udupi','Tumakuru','Bidar'],
+  'Kerala':                 ['Thiruvananthapuram','Kochi','Kozhikode','Thrissur','Kollam','Palakkad','Alappuzha','Kannur','Kottayam','Malappuram','Kasaragod','Pathanamthitta'],
+  'Madhya Pradesh':         ['Indore','Bhopal','Jabalpur','Gwalior','Ujjain','Sagar','Ratlam','Satna','Rewa','Dewas'],
+  'Maharashtra':            ['Mumbai','Pune','Nagpur','Thane','Nashik','Aurangabad','Solapur','Kolhapur','Amravati','Navi Mumbai','Vasai-Virar','Pimpri-Chinchwad'],
+  'Manipur':                ['Imphal','Thoubal','Bishnupur'],
+  'Meghalaya':              ['Shillong','Tura','Nongpoh'],
+  'Mizoram':                ['Aizawl','Lunglei','Champhai'],
+  'Nagaland':               ['Kohima','Dimapur','Mokokchung'],
+  'Odisha':                 ['Bhubaneswar','Cuttack','Rourkela','Brahmapur','Sambalpur','Puri','Balasore','Bhadrak'],
+  'Punjab':                 ['Ludhiana','Amritsar','Jalandhar','Patiala','Bathinda','Mohali','Firozpur','Gurdaspur'],
+  'Rajasthan':              ['Jaipur','Jodhpur','Kota','Bikaner','Ajmer','Udaipur','Bhilwara','Alwar','Bharatpur','Sikar'],
+  'Sikkim':                 ['Gangtok','Namchi','Mangan'],
+  'Tamil Nadu':             ['Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tirunelveli','Tiruppur','Vellore','Erode','Thoothukkudi','Dindigul'],
+  'Telangana':              ['Hyderabad','Warangal','Nizamabad','Khammam','Karimnagar','Ramagundam','Mahbubnagar'],
+  'Tripura':                ['Agartala','Udaipur','Dharmanagar'],
+  'Uttar Pradesh':          ['Lucknow','Kanpur','Ghaziabad','Agra','Meerut','Varanasi','Allahabad','Bareilly','Aligarh','Moradabad','Noida','Gorakhpur','Mathura'],
+  'Uttarakhand':            ['Dehradun','Haridwar','Roorkee','Haldwani','Rudrapur','Rishikesh','Nainital','Mussoorie'],
+  'West Bengal':            ['Kolkata','Howrah','Durgapur','Asansol','Siliguri','Bardhaman','Malda','Baharampur'],
+  'Andaman & Nicobar Islands': ['Port Blair'],
+  'Chandigarh':             ['Chandigarh'],
+  'Dadra & Nagar Haveli':   ['Silvassa'],
+  'Daman & Diu':            ['Daman','Diu'],
+  'Delhi':                  ['New Delhi','Dwarka','Rohini','Saket','Janakpuri','Lajpat Nagar','Karol Bagh','Connaught Place','Pitampura','Vasant Kunj'],
+  'Jammu & Kashmir':        ['Srinagar','Jammu','Anantnag','Baramulla','Sopore'],
+  'Ladakh':                 ['Leh','Kargil'],
+  'Lakshadweep':            ['Kavaratti'],
+  'Puducherry':             ['Puducherry','Karaikal','Yanam','Mahe'],
+  // USA
+  'California':             ['Los Angeles','San Francisco','San Diego','San Jose','Sacramento','Oakland','Fresno','Long Beach'],
+  'Texas':                  ['Houston','Dallas','Austin','San Antonio','Fort Worth','El Paso','Arlington','Corpus Christi'],
+  'New York':               ['New York City','Buffalo','Rochester','Yonkers','Syracuse','Albany','New Rochelle'],
+  'Florida':                ['Miami','Orlando','Tampa','Jacksonville','St. Petersburg','Tallahassee','Fort Lauderdale'],
+  // UK
+  'England':                ['London','Manchester','Birmingham','Leeds','Liverpool','Sheffield','Bristol','Newcastle','Nottingham','Leicester'],
+  'Scotland':               ['Edinburgh','Glasgow','Aberdeen','Dundee','Inverness'],
+  'Wales':                  ['Cardiff','Swansea','Newport','Bangor'],
+  'Northern Ireland':       ['Belfast','Londonderry','Lisburn','Newry'],
+  // UAE
+  'Dubai':                  ['Dubai Marina','Deira','Bur Dubai','Jumeirah','Business Bay','Downtown Dubai'],
+  'Abu Dhabi':              ['Abu Dhabi City','Al Ain','Khalifa City','Musaffah'],
+  'Sharjah':                ['Sharjah City','Khor Fakkan','Kalba'],
+  // Australia
+  'New South Wales':        ['Sydney','Newcastle','Wollongong','Parramatta','Gosford'],
+  'Victoria':               ['Melbourne','Geelong','Ballarat','Bendigo','Shepparton'],
+  'Queensland':             ['Brisbane','Gold Coast','Sunshine Coast','Townsville','Cairns'],
+  // Canada
+  'Ontario':                ['Toronto','Ottawa','Mississauga','Brampton','Hamilton','London'],
+  'British Columbia':       ['Vancouver','Victoria','Kelowna','Surrey','Burnaby'],
+  'Quebec':                 ['Montreal','Quebec City','Laval','Gatineau','Longueuil'],
+  // Default
+  'N/A':                    ['N/A'],
+};
+
+
+function StyledSelect({ value, onChange, children, required }) {
+  return (
+    <select
+      required={required}
+      value={value}
+      onChange={onChange}
+      style={{ ...inputStyle, cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'8\' viewBox=\'0 0 12 8\'%3E%3Cpath d=\'M1 1l5 5 5-5\' stroke=\'%23D4AF37\' stroke-width=\'1.5\' fill=\'none\' stroke-linecap=\'round\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px' }}
+      onFocus={e => e.target.style.borderColor = '#D4AF37'}
+      onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+    >
+      {children}
+    </select>
+  );
+}
+
 function Field({ label, children }) {
   return (
     <div style={{ textAlign: 'left' }}>
@@ -135,6 +231,7 @@ export default function Login() {
       localStorage.setItem('username', data.username);
       localStorage.setItem('token', data.token);
       localStorage.setItem('balance', data.balance);
+      localStorage.setItem(`firstVisit_${data.username}`, 'true'); // flag for Dashboard greeting
       showToast(`🔥 Welcome aboard, ${data.username}! You're in the most exclusive auction floor.`, 'success');
       navigate('/dashboard');
     } catch (err) {
@@ -392,25 +489,42 @@ export default function Login() {
         {isRegister && step === 1 && (
           <form key="step1" onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Field label="Full Name *">
-              <StyledInput required value={fullName} onChange={e => setFullName(e.target.value)} />
+              <StyledInput required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Your full name" />
             </Field>
             <Field label="Phone *">
-              <StyledInput type="tel" required value={phone} onChange={e => setPhone(e.target.value)} />
+              <StyledInput type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210" />
             </Field>
             <Field label="Address *">
-              <StyledInput required value={address} onChange={e => setAddress(e.target.value)} />
+              <StyledInput required value={address} onChange={e => setAddress(e.target.value)} placeholder="Street / Building / Area" />
             </Field>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <Field label="City *">
-                <StyledInput required value={city} onChange={e => setCity(e.target.value)} />
-              </Field>
-              <Field label="State *">
-                <StyledInput required value={state} onChange={e => setState(e.target.value)} />
-              </Field>
-            </div>
+
+            {/* Country dropdown */}
             <Field label="Country *">
-              <StyledInput required value={country} onChange={e => setCountry(e.target.value)} />
+              <StyledSelect required value={country} onChange={e => { setCountry(e.target.value); setState(''); setCity(''); }}>
+                <option value="" disabled style={{ background: '#0d1117' }}>— Select Country —</option>
+                {COUNTRIES.map(c => (
+                  <option key={c} value={c} style={{ background: '#0d1117', color: 'white' }}>{c}</option>
+                ))}
+              </StyledSelect>
             </Field>
+
+            {/* State dropdown — updates based on country */}
+            <Field label="State / Province *">
+              <StyledSelect required value={state} onChange={e => { setState(e.target.value); setCity(''); }} disabled={!country}>
+                <option value="" disabled style={{ background: '#0d1117' }}>
+                  {country ? '— Select State —' : '— Choose country first —'}
+                </option>
+                {(COUNTRY_STATES[country] || []).map(s => (
+                  <option key={s} value={s} style={{ background: '#0d1117', color: 'white' }}>{s}</option>
+                ))}
+              </StyledSelect>
+            </Field>
+
+            {/* City — free text, under state */}
+            <Field label="City *">
+              <StyledInput required value={city} onChange={e => setCity(e.target.value)} placeholder="Enter your city" />
+            </Field>
+
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
               <button type="button" onClick={prevStep} style={backBtnStyle}>
                 <ChevronLeft size={16} /> Back

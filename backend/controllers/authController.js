@@ -8,15 +8,8 @@ const generateToken = (id) => {
   });
 };
 
-// ── Email transporter (Gmail) ────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
+// ── Email transporter is created lazily inside sendOtp so it always
+// reads the correct dotenv values after the server has fully started.
 // ── Register ─────────────────────────────────────────────────────────────────
 export const registerUser = async (req, res) => {
   try {
@@ -132,6 +125,17 @@ export const sendOtp = async (req, res) => {
     user.resetOtp = otp;
     user.resetOtpExpiry = expiry;
     await user.save();
+
+    // Create transporter fresh each time so env vars are always loaded
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    console.log('Sending OTP email via:', process.env.EMAIL_USER);
 
     // Send email
     await transporter.sendMail({
