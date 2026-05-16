@@ -37,6 +37,9 @@ const userSchema = new mongoose.Schema({
   accountNumber: { type: String, default: '' },
   ifscCode: { type: String, default: '' },
   accountHolder: { type: String, default: '' },
+  // Password Reset OTP
+  resetOtp: { type: String, default: null },
+  resetOtpExpiry: { type: Date, default: null },
 }, { timestamps: true });
 
 // Hash password before saving
