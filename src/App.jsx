@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -10,8 +10,14 @@ import UserProfile from './pages/UserProfile';
 import { ToastProvider } from './contexts/ToastContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import API_BASE from './config';
 
 function App() {
+  // Wake up Render backend immediately on app load (prevents cold-start delays)
+  useEffect(() => {
+    fetch(`${API_BASE}/ping`).catch(() => {});
+  }, []);
+
   return (
     <ThemeProvider>
       <ToastProvider>

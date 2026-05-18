@@ -40,7 +40,10 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Main Routes
 app.use('/api', auctionRoutes);
-app.use('/api/auth', authRoutes); // newly added
+app.use('/api/auth', authRoutes);
+
+// Health check — keeps Render warm (ping this every 5 min with UptimeRobot)
+app.get('/ping', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
 // Real-Time Socket.io Connection
 io.on('connection', (socket) => {
