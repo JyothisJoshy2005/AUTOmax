@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: automax-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false   # set manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false   # set manually in Render dashboard
+      - key: EMAIL_USER
+        sync: false   # set manually in Render dashboard
+      - key: EMAIL_PASS
+        sync: false   # set manually in Render dashboard
+      - key: FRONTEND_URL
+        sync: false   # set to your Vercel URL e.g. https://automax-nine.vercel.app
