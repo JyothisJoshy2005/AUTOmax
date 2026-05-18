@@ -1,6 +1,8 @@
 // Central API configuration
-// In production: set VITE_API_URL in your Vercel environment variables
-// In development: falls back to localhost:5000
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Uses VITE_API_URL from Vercel env vars in production,
+// falls back to Render backend URL if not set,
+// and localhost only for local dev overrides.
+const API_BASE = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://automax-o9no.onrender.com');
 
 export default API_BASE;
