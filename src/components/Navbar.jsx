@@ -21,35 +21,38 @@ export default function Navbar() {
   useEffect(() => {
     if (!username || username === 'Guest') return;
 
-    // Fetch both bids and cars so we can match names and check active status
-    Promise.all([
-      axios.get(`${API_BASE}/api/bids`),
-      axios.get(`${API_BASE}/api/cars`),
-    ])
-      .then(([bidsRes, carsRes]) => {
-        const now = new Date();
-        const allCars = carsRes.data;
+    const fetchNotifs = () => {
+      Promise.all([
+        axios.get(`${API_BASE}/api/bids`),
+        axios.get(`${API_BASE}/api/cars`),
+      ])
+        .then(([bidsRes, carsRes]) => {
+          const now = new Date();
+          const allCars = carsRes.data;
 
-        // Only show bids where:
-        // 1. The bid belongs to this user (highest bid = active bid)
-        // 2. The auction is still running (endTime in the future)
-        const myActiveBids = bidsRes.data.filter(b => {
-          if (b.bidderName !== username) return false;
-          const car = allCars.find(c => String(c.id) === String(b.carId));
-          if (!car) return false;
-          return new Date(car.endTime) > now; // only active auctions
-        });
+          const myActiveBids = bidsRes.data.filter(b => {
+            if (b.bidderName !== username) return false;
+            const car = allCars.find(c => String(c.id) === String(b.carId));
+            if (!car) return false;
+            return new Date(car.endTime) > now;
+          });
 
-        const enriched = myActiveBids.map(bid => {
-          const car = allCars.find(c => String(c.id) === String(bid.carId)) || {};
-          return { ...bid, car };
-        });
+          const enriched = myActiveBids.map(bid => {
+            const car = allCars.find(c => String(c.id) === String(bid.carId)) || {};
+            return { ...bid, car };
+          });
 
-        setNotifCount(enriched.length);
-        setNotifs(enriched);
-      })
-      .catch(console.error);
+          setNotifCount(enriched.length);
+          setNotifs(enriched);
+        })
+        .catch(console.error);
+    };
+
+    fetchNotifs(); // run immediately on mount
+    const interval = setInterval(fetchNotifs, 30000); // then every 30s
+    return () => clearInterval(interval); // cleanup on unmount
   }, [username]);
+
 
 
   const scrollToSection = (id) => {
