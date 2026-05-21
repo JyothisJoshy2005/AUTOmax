@@ -6,7 +6,6 @@ import axios from 'axios';
 import { useToast } from '../contexts/ToastContext';
 import { useSearch } from '../contexts/SearchContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { CARS } from '../data/cars.js';
 import API_BASE from '../config.js';
 
 export default function Navbar() {
@@ -20,20 +19,38 @@ export default function Navbar() {
   const [showNotifs, setShowNotifs] = useState(false);
 
   useEffect(() => {
-    axios.get(`${API_BASE}/api/bids`)
-      .then(res => {
-        const myBids = res.data.filter(b => b.bidderName === username);
-        setNotifCount(myBids.length);
-        
-        const enrichedBids = myBids.map(bid => {
-          const carId = parseInt(bid.items[0]);
-          const vehicle = CARS.find(c => c.id === carId);
-          return { ...bid, car: vehicle || { make: 'Unknown', model: 'Car' } };
+    if (!username || username === 'Guest') return;
+
+    // Fetch both bids and cars so we can match names and check active status
+    Promise.all([
+      axios.get(`${API_BASE}/api/bids`),
+      axios.get(`${API_BASE}/api/cars`),
+    ])
+      .then(([bidsRes, carsRes]) => {
+        const now = new Date();
+        const allCars = carsRes.data;
+
+        // Only show bids where:
+        // 1. The bid belongs to this user (highest bid = active bid)
+        // 2. The auction is still running (endTime in the future)
+        const myActiveBids = bidsRes.data.filter(b => {
+          if (b.bidderName !== username) return false;
+          const car = allCars.find(c => String(c.id) === String(b.carId));
+          if (!car) return false;
+          return new Date(car.endTime) > now; // only active auctions
         });
-        setNotifs(enrichedBids);
+
+        const enriched = myActiveBids.map(bid => {
+          const car = allCars.find(c => String(c.id) === String(bid.carId)) || {};
+          return { ...bid, car };
+        });
+
+        setNotifCount(enriched.length);
+        setNotifs(enriched);
       })
       .catch(console.error);
   }, [username]);
+
 
   const scrollToSection = (id) => {
     if (window.location.pathname !== '/dashboard') {
@@ -173,12 +190,12 @@ export default function Navbar() {
               ) : (
                 notifs.map((n, idx) => (
                   <div key={idx} style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }} 
-                       onClick={() => { setShowNotifs(false); navigate(`/car/${n.items[0]}`); }}
+                       onClick={() => { setShowNotifs(false); navigate(`/car/${n.carId}`); }}
                        onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
                        onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                   >
                     <p style={{ margin: '0 0 4px 0', fontSize: '0.9rem' }}>You hold the active bid on a <strong>{n.car.make} {n.car.model}</strong>.</p>
-                    <span className="text-gold" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Bid exactly ₹{n.bidAmount?.toLocaleString()}</span>
+                    <span className="text-gold" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Bid ₹{n.bidAmount?.toLocaleString('en-IN')}</span>
                   </div>
                 ))
               )}
